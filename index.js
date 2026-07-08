@@ -23,19 +23,28 @@ const thirdwebFacilitator = facilitator({
 app.get('/define', async (req, res) => {
   const paymentData = req.headers['payment-signature'] || req.headers['x-payment'];
 
-  const result = await settlePayment({
-    resourceUrl: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
-    method: 'GET',
-    paymentData,
-    payTo: WALLET_ADDRESS,
-    network: celoSepolia,
-    price: '$0.01',
-    facilitator: thirdwebFacilitator,
-    routeConfig: {
-      description: 'LexiPedia — Web3 term definition',
-      mimeType: 'application/json',
-    },
-  });
+  let result;
+  try {
+    result = await settlePayment({
+      resourceUrl: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+      method: 'GET',
+      paymentData,
+      payTo: WALLET_ADDRESS,
+      network: celoSepolia,
+      price: '$0.01',
+      facilitator: thirdwebFacilitator,
+      routeConfig: {
+        description: 'LexiPedia — Web3 term definition',
+        mimeType: 'application/json',
+      },
+    });
+  } catch (err) {
+    console.error('settlePayment threw:', err);
+    return res.status(500).json({
+      error: 'settlePayment failed',
+      message: err.message,
+    });
+  }
 
   if (result.status !== 200) {
     return res.status(result.status).set(result.responseHeaders).json(result.responseBody);
