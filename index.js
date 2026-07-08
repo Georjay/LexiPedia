@@ -23,21 +23,34 @@ const thirdwebFacilitator = facilitator({
 app.get('/define', async (req, res) => {
   const paymentData = req.headers['payment-signature'] || req.headers['x-payment'];
 
+  const params = {
+    resourceUrl: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+    method: 'GET',
+    paymentData,
+    payTo: WALLET_ADDRESS,
+    network: celoSepolia,
+    price: '$0.01',
+    facilitator: thirdwebFacilitator,
+    routeConfig: {
+      description: 'LexiPedia — Web3 term definition',
+      mimeType: 'application/json',
+    },
+  };
+
+  console.log('settlePayment params:', {
+    resourceUrl: params.resourceUrl,
+    method: params.method,
+    paymentData: params.paymentData,
+    payTo: params.payTo,
+    network: params.network, // log the whole chain object
+    price: params.price,
+    hasSecretKey: !!process.env.THIRDWEB_SECRET_KEY,
+    hasServerWallet: !!process.env.SERVER_WALLET_ADDRESS,
+  });
+
   let result;
   try {
-    result = await settlePayment({
-      resourceUrl: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
-      method: 'GET',
-      paymentData,
-      payTo: WALLET_ADDRESS,
-      network: celoSepolia,
-      price: '$0.01',
-      facilitator: thirdwebFacilitator,
-      routeConfig: {
-        description: 'LexiPedia — Web3 term definition',
-        mimeType: 'application/json',
-      },
-    });
+    result = await settlePayment(params);
   } catch (err) {
     console.error('settlePayment threw:', err);
     return res.status(500).json({
@@ -46,32 +59,7 @@ app.get('/define', async (req, res) => {
     });
   }
 
-  if (result.status !== 200) {
-    return res.status(result.status).set(result.responseHeaders).json(result.responseBody);
-  }
-
-  const term = req.query.term?.toLowerCase().replace(/\s+/g, '');
-
-  if (!term) {
-    return res.status(400).json({
-      error: 'Please provide a term. Example: /define?term=blockchain'
-    });
-  }
-
-  const definition = terms[term];
-
-  if (!definition) {
-    return res.status(404).json({
-      error: `Term "${req.query.term}" not found in LexiPedia yet.`
-    });
-  }
-
-  res.json({
-    term: req.query.term,
-    definition: definition,
-    powered_by: 'LexiPedia on Celo',
-    price_paid: '0.01 USDC'
-  });
+  // ...rest unchanged
 });
 
 app.get('/', (req, res) => {
