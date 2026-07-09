@@ -1,8 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const { createThirdwebClient } = require('thirdweb');
+const { createThirdwebClient, defineChain } = require('thirdweb');
 const { facilitator, settlePayment } = require('thirdweb/x402');
-const { celoSepolia } = require('thirdweb/chains'); // testnet for now
 const terms = require('./terms');
 
 const app = express();
@@ -19,6 +18,8 @@ const thirdwebFacilitator = facilitator({
   client,
   serverWalletAddress: process.env.SERVER_WALLET_ADDRESS,
 });
+
+const celoSepolia = defineChain(11142220); // Celo Sepolia Testnet
 
 app.get('/define', async (req, res) => {
   const paymentData = req.headers['payment-signature'] || req.headers['x-payment'];
@@ -38,14 +39,8 @@ app.get('/define', async (req, res) => {
   };
 
   console.log('settlePayment params:', {
-    resourceUrl: params.resourceUrl,
-    method: params.method,
-    paymentData: params.paymentData,
-    payTo: params.payTo,
-    network: params.network, // log the whole chain object
-    price: params.price,
-    hasSecretKey: !!process.env.THIRDWEB_SECRET_KEY,
-    hasServerWallet: !!process.env.SERVER_WALLET_ADDRESS,
+    ...params,
+    facilitator: '[omitted]',
   });
 
   let result;
@@ -53,13 +48,28 @@ app.get('/define', async (req, res) => {
     result = await settlePayment(params);
   } catch (err) {
     console.error('settlePayment threw:', err);
-    return res.status(500).json({
-      error: 'settlePayment failed',
-      message: err.message,
-    });
+    return res.status(500).json({ error: 'settlePayment failed', message: err.message });
   }
 
-  // ...rest unchanged
+  if (result.status !== 200) {
+    return res.status(result.status).set(result.responseHeaders).json(result.responseBody);
+  }
+
+  const term = req.query.term?.toLowerCase().replace(/\s+/g, '');
+  if (!term) {
+    return res.status(400).json({ error: 'Please provide a term. Example: /define?term=blockchain' });
+  }
+  const definition = terms[term];
+  if (!definition) {
+    return res.status(404).json({ error: `Term "${req.query.term}" not found in LexiPedia yet.` });
+  }
+
+  res.json({
+    term: req.query.term,
+    definition: definition,
+    powered_by: 'LexiPedia on Celo',
+    price_paid: '0.01 USDC'
+  });
 });
 
 app.get('/', (req, res) => {
