@@ -93,10 +93,21 @@ app.get('/debug', (req, res) => {
     validHexFormat: val ? hexAddressRegex.test(val) : false,
   });
 
+  const secretKey = process.env.THIRDWEB_SECRET_KEY;
+  const checkSecret = (val) => ({
+    length: val?.length,
+    hasWhitespace: val ? val !== val.trim() : null,
+    startsWithQuote: val?.startsWith('"') || val?.startsWith("'"),
+    endsWithQuote: val?.endsWith('"') || val?.endsWith("'"),
+    firstTwoChars: val?.slice(0, 2),
+    lastTwoChars: val?.slice(-2),
+  });
+
   res.json({
     WALLET_ADDRESS: checkAddr(process.env.WALLET_ADDRESS),
     SERVER_WALLET_ADDRESS: checkAddr(process.env.SERVER_WALLET_ADDRESS),
     USDC_ADDRESS_HARDCODED: checkAddr('0xcebA9300f2b948710d2653dD7B07f33A8B32118C'),
+    THIRDWEB_SECRET_KEY: checkSecret(secretKey),
   });
 });
 
