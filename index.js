@@ -30,18 +30,18 @@ app.get('/define', async (req, res) => {
     paymentData,
     payTo: WALLET_ADDRESS,
     network: celoSepolia,
-    price: '$0.01',
+    price: {
+      amount: '10000', // 0.01 USDC (6 decimals)
+      asset: {
+        address: '0xcebA9300f2b948710d2653dD7B07f33A8B32118C',
+      },
+    },
     facilitator: thirdwebFacilitator,
     routeConfig: {
       description: 'LexiPedia — Web3 term definition',
       mimeType: 'application/json',
     },
   };
-
-  console.log('settlePayment params:', {
-    ...params,
-    facilitator: '[omitted]',
-  });
 
   let result;
   try {
