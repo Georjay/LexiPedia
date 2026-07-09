@@ -39,7 +39,7 @@ app.get('/define', async (req, res) => {
     },
     facilitator: thirdwebFacilitator,
     routeConfig: {
-      description: 'LexiPedia — Web3 term definition',
+      description: 'LexiPedia Web3 term definition',
       mimeType: 'application/json',
     },
   };
