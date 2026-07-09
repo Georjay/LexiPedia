@@ -19,7 +19,8 @@ const thirdwebFacilitator = facilitator({
   serverWalletAddress: process.env.SERVER_WALLET_ADDRESS,
 });
 
-const celoSepolia = defineChain(11142220); // Celo Sepolia Testnet
+
+const { celo } = require('thirdweb/chains'); // swap back from defineChain(11142220)
 
 app.get('/define', async (req, res) => {
   const paymentData = req.headers['payment-signature'] || req.headers['x-payment'];
@@ -29,11 +30,11 @@ app.get('/define', async (req, res) => {
     method: 'GET',
     paymentData,
     payTo: WALLET_ADDRESS,
-    network: celoSepolia,
+    network: celo,
     price: {
       amount: '10000', // 0.01 USDC (6 decimals)
       asset: {
-        address: '0xcebA9300f2b948710d2653dD7B07f33A8B32118C',
+        address: '0xcebA9300f2b948710d2653dD7B07f33A8B32118C', // Circle-verified, Celo mainnet
       },
     },
     facilitator: thirdwebFacilitator,
