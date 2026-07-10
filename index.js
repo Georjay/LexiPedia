@@ -5,10 +5,14 @@ const { facilitator, settlePayment } = require('thirdweb/x402');
 const terms = require('./terms');
 
 const app = express();
+const cors = require('cors');
+app.use(cors());
+
 const PORT = process.env.PORT || 3000;
 const WALLET_ADDRESS = process.env.WALLET_ADDRESS;
 
 app.use(express.json());
+app.use(express.static('public'));
 
 const client = createThirdwebClient({
   secretKey: process.env.THIRDWEB_SECRET_KEY,

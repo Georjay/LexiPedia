@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LexiPedia — Your Web3 Dictionary</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #FCFF52;
+      letter-spacing: -1px;
+    }
+
+    .logo p {
+      color: #888;
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: #FCFF52;
+      margin-top: 10px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    input {
+      flex: 1;
+      padding: 14px 18px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: #FCFF52; }
+    input::placeholder { color: #555; }
+
+    button {
+      padding: 14px 24px;
+      background: #FCFF52;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .result {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 24px;
+      display: none;
+    }
+
+    .result.visible { display: block; }
+
+    .result-term {
+      font-size: 0.8rem;
+      color: #FCFF52;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .result-definition {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #e0e0e0;
+    }
+
+    .result-meta {
+      margin-top: 16px;
+      font-size: 0.78rem;
+      color: #555;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .error {
+      background: #1a0a0a;
+      border-color: #ff4444;
+      color: #ff8888;
+    }
+
+    .loading { color: #888; text-align: center; padding: 20px; display: none; }
+    .loading.visible { display: block; }
+
+    .terms-hint {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .terms-hint p { color: #555; font-size: 0.85rem; margin-bottom: 12px; }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .tag {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      border-color: #FCFF52;
+      color: #FCFF52;
+    }
+
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      color: #333;
+      font-size: 0.78rem;
+    }
+
+    .payment-notice {
+      background: #111;
+      border: 1px solid #FCFF52;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 0.82rem;
+      color: #888;
+      text-align: center;
+    }
+
+    .payment-notice span { color: #FCFF52; }
+  </style>
+</head>
+<body>
+
+  <nav style="position: fixed; top: 0; left: 0; right: 0; padding: 16px 24px; display: flex; align-items: center; gap: 10px; background: rgba(10,10,10,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid #1a1a1a; z-index: 100;">
+    <img src="lexipedia-logo.png" alt="LexiPedia" style="width: 36px; height: 36px; border-radius: 50%;" />
+    <span style="font-weight: 700; color: #FCFF52; font-size: 1.1rem;">LexiPedia</span>
+  </nav>
+
+  <div class="container">
+    <div class="logo">
+      <h1>LexiPedia</h1>
+      <p>Web3 terms explained in plain English</p>
+      <span class="badge">Powered by Celo x402</span>
+    </div>
+
+    <div class="payment-notice">
+      Each query costs <span>0.01 USDC</span> paid instantly via <span>x402 on Celo</span>
+    </div>
+
+    <div class="search-box">
+      <input 
+        type="text" 
+        id="termInput" 
+        placeholder="Enter a Web3 term (e.g. blockchain, gas, nft...)"
+      />
+      <button id="searchBtn" onclick="lookup()">Define</button>
+    </div>
+
+    <div class="loading" id="loading">Looking up definition...</div>
+
+    <div class="result" id="result">
+      <div class="result-term" id="resultTerm"></div>
+      <div class="result-definition" id="resultDefinition"></div>
+      <div class="result-meta">
+        <span id="resultMeta"></span>
+        <span>LexiPedia on Celo</span>
+      </div>
+    </div>
+
+    <div class="terms-hint">
+      <p>Try these terms</p>
+      <div class="tags">
+        <span class="tag" onclick="quickLookup('blockchain')">blockchain</span>
+        <span class="tag" onclick="quickLookup('wallet')">wallet</span>
+        <span class="tag" onclick="quickLookup('gas')">gas</span>
+        <span class="tag" onclick="quickLookup('nft')">nft</span>
+        <span class="tag" onclick="quickLookup('defi')">defi</span>
+        <span class="tag" onclick="quickLookup('smartcontract')">smart contract</span>
+        <span class="tag" onclick="quickLookup('mining')">mining</span>
+        <span class="tag" onclick="quickLookup('stablecoin')">stablecoin</span>
+        <span class="tag" onclick="quickLookup('x402')">x402</span>
+        <span class="tag" onclick="quickLookup('layer2')">layer 2</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      Built on Celo · x402 micropayments · 
+      <a href="https://github.com/Georjay/LexiPedia" style="color: #555; text-decoration: none;">GitHub</a>
+      · Built by <a href="https://x.com/geonoblegreat" style="text-decoration: none;">@geonoblegreat</a>
+    </div>
+
+
+    <!-- <div class="footer">
+      Built on Celo by @geonoblegreat · x402 micropayments · 
+      <a href="https://github.com/Georjay/LexiPedia" 
+         style="color: #555; text-decoration: none;">GitHub</a>
+    </div>
+  </div> -->
+
+  <script>
+    // const API_BASE = 'https://lexipedia-production.up.railway.app';
+
+    const API_BASE = window.location.hostname === 'localhost' 
+      ? 'http://localhost:3000' 
+      : 'https://lexipedia-production.up.railway.app';
+
+
+    async function lookup() {
+      const term = document.getElementById('termInput').value.trim();
+      if (!term) return;
+      await fetchDefinition(term);
+    }
+
+    async function quickLookup(term) {
+      document.getElementById('termInput').value = term;
+      await fetchDefinition(term);
+    }
+
+    async function fetchDefinition(term) {
+      const btn = document.getElementById('searchBtn');
+      const loading = document.getElementById('loading');
+      const result = document.getElementById('result');
+
+      btn.disabled = true;
+      loading.classList.add('visible');
+      result.classList.remove('visible', 'error');
+
+      try {
+        const response = await fetch(`${API_BASE}/define?term=${encodeURIComponent(term)}`);
+        const data = await response.json();
+
+        if (response.status === 402) {
+          document.getElementById('resultTerm').textContent = 'Payment Required';
+          document.getElementById('resultDefinition').textContent = 
+            'This query requires 0.01 USDC via x402 on Celo. Connect an x402-compatible wallet to proceed.';
+          document.getElementById('resultMeta').textContent = 'x402 payment gate active';
+          result.classList.add('visible', 'error');
+        } else if (response.ok) {
+          document.getElementById('resultTerm').textContent = data.term;
+          document.getElementById('resultDefinition').textContent = data.definition;
+          document.getElementById('resultMeta').textContent = data.price_paid;
+          result.classList.add('visible');
+        } else {
+          document.getElementById('resultTerm').textContent = 'Not Found';
+          document.getElementById('resultDefinition').textContent = 
+            data.error || 'Term not found in LexiPedia yet.';
+          document.getElementById('resultMeta').textContent = '';
+          result.classList.add('visible', 'error');
+        }
+      } catch (err) {
+        document.getElementById('resultTerm').textContent = 'Error';
+        document.getElementById('resultDefinition').textContent = 
+          'Could not reach LexiPedia. Please try again.';
+        result.classList.add('visible', 'error');
+      } finally {
+        btn.disabled = false;
+        loading.classList.remove('visible');
+      }
+    }
+
+    document.getElementById('termInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') lookup();
+    });
+  </script>
+</body>
+</html>
