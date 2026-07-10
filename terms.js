@@ -37,7 +37,7 @@ const terms = {
     
     seedphrase: "Twelve or twenty-four words that act as the master key to your wallet. Anyone with these words owns your wallet completely.",
     
-    x402: "An HTTP payment standard that enables instant micropayments for APIs and online services. When a server requires payment, it returns a 402 status and the client pays automatically before receiving the response."
+    x402: "An HTTP payment standard that enables instant micropayments for APIs and online services. When a server requires payment, it returns a 402 status and the client pays automatically before receiving the response.",
 
     dapp: "Decentralised Application. An app that runs on a blockchain instead of a central server. No single company controls it.",
 
