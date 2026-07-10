@@ -89,6 +89,19 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/api/health', (req, res) => {
+  res.json({
+    name: 'LexiPedia',
+    description: 'Pay-per-query Web3 dictionary on Celo',
+    usage: '/define?term=blockchain',
+    price: '0.01 USDC per query',
+    network: 'Celo Mainnet',
+    facilitator: 'x402.celo.org',
+    terms_available: Object.keys(terms).length
+  });
+});
+
+
 app.listen(PORT, () => {
   console.log(`LexiPedia running on port ${PORT}`);
 });
