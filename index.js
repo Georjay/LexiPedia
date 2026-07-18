@@ -67,13 +67,15 @@ app.get('/define', (req, res) => {
     });
   }
 
+  res.setHeader('X-Attribution-Tag', 'celo_ff732ba4f443');
   res.json({
-    term: req.query.term,
-    definition: definition,
-    powered_by: 'LexiPedia on Celo',
-    price_paid: '0.01 USDC'
-  });
+  term: req.query.term,
+  definition: definition,
+  powered_by: 'LexiPedia on Celo',
+  price_paid: '0.01 USDC',
+  attribution: 'celo_ff732ba4f443'
 });
+
 
 app.get('/api/health', (req, res) => {
   res.json({
