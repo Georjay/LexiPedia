@@ -141,9 +141,11 @@ curl -X PUT https://celobuilders.xyz/submissions/me \
     "projectName": "AgentPay",
     "githubUrl": "https://github.com/example/agentpay",
     "trackIds": ["best-agent"],
-    "customFields": { "telegram": "@janedoe" }
+    "customFields": { "telegram": "@janedoe", "agentWalletAddress": "0x1234...abcd" }
   }'
 ```
+
+If the builder already has an agent wallet, include `agentWalletAddress` at registration even though it is only required to publish — x402 facilitator settlements are attributed to that wallet, and the leaderboard shows them as soon as it is on file (attribution is retroactive across the whole hackathon window, but the leaderboard reads zero until the wallet is added). If there is no wallet yet, add it to the submission the moment one exists.
 
 The response includes `attributionTag` (`celo_` + 12 hex characters) — the builder's on-chain attribution tag, derived from the GitHub `owner/repo` slug and locked to the first saved value (later URL edits do not change it). Show it to the builder right away with the integration one-liner:
 
