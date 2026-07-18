@@ -40,6 +40,33 @@ const facilitatorClient = new HTTPFacilitatorClient({
 const resourceServer = new x402ResourceServer(facilitatorClient)
   .register("eip155:42220", new ExactEvmScheme());
 
+// const resourceServer = new x402ResourceServer(facilitatorClient)
+//   .register("celo", new ExactEvmScheme());
+
+
+// app.use(
+//   paymentMiddleware(
+//     {
+//       "GET /define": {
+//         accepts: {
+//           scheme: "exact",
+//           network: "celo",
+//           payTo: WALLET_ADDRESS,
+//           price: {
+//             asset: "0xcebA9300f2b948710d2653dD7B07f33A8B32118C",
+//             amount: "10000",
+//             extra: { name: "USDC", version: "2" },
+//           },
+//         },
+//         description: "LexiPedia Web3 term definition",
+//         mimeType: "application/json",
+//       },
+//     },
+//     resourceServer,
+//   )
+// );
+
+
 app.use(
   paymentMiddleware(
     {
