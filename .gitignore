@@ -3,3 +3,5 @@ node_modules/
 *.log
 test-client.mjs
 client.mjs
+run-payments.mjs
+index.backup.js
