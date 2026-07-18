@@ -15,7 +15,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-
 const facilitatorClient = new HTTPFacilitatorClient({
   url: "https://api.x402.celo.org",
   createAuthHeaders: async () => {
@@ -26,7 +25,6 @@ const facilitatorClient = new HTTPFacilitatorClient({
 
 const resourceServer = new x402ResourceServer(facilitatorClient)
   .register("eip155:42220", new ExactEvmScheme());
-
 
 app.use(
   paymentMiddleware(
@@ -69,13 +67,13 @@ app.get('/define', (req, res) => {
 
   res.setHeader('X-Attribution-Tag', 'celo_ff732ba4f443');
   res.json({
-  term: req.query.term,
-  definition: definition,
-  powered_by: 'LexiPedia on Celo',
-  price_paid: '0.01 USDC',
-  attribution: 'celo_ff732ba4f443'
+    term: req.query.term,
+    definition: definition,
+    powered_by: 'LexiPedia on Celo',
+    price_paid: '0.01 USDC',
+    attribution: 'celo_ff732ba4f443'
+  });
 });
-
 
 app.get('/api/health', (req, res) => {
   res.json({
