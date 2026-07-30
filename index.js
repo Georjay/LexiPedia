@@ -61,7 +61,7 @@ app.get('/define', (req, res) => {
 
   if (!definition) {
     return res.status(404).json({
-      error: `Term "${req.query.term}" not found in LexiPedia yet.`
+      error: `"${req.query.term}" is not in LexiPedia yet. Try: blockchain, wallet, gas, nft, defi.`
     });
   }
 
