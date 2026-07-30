@@ -69,6 +69,8 @@ const terms = {
 
   gaslimit: "The maximum you are willing to spend on a single transaction. If the transaction needs more than your limit, it fails and you still pay for the computation already done.",
 
+  mempool: "A waiting room for unconfirmed transactions. When you send crypto it sits in the mempool until a miner or validator picks it up and adds it to a block.",
+
   whitepaper: "The founding document of a blockchain project. Like a business plan and technical manual combined. Satoshi Nakamoto's Bitcoin whitepaper is only nine pages and changed the world.",
 
   protocol: "The rulebook that governs how a blockchain or DeFi platform operates. Think of it like the constitution of a country — everyone follows the same rules.",
