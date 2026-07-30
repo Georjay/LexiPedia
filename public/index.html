@@ -249,7 +249,7 @@
     </div>
   </div> -->
 
-  <script>
+  <!-- <script>
     // const API_BASE = 'https://lexipedia-production.up.railway.app';
 
     const API_BASE = window.location.hostname === 'localhost' 
@@ -268,51 +268,214 @@
       await fetchDefinition(term);
     }
 
-    async function fetchDefinition(term) {
-      const btn = document.getElementById('searchBtn');
-      const loading = document.getElementById('loading');
-      const result = document.getElementById('result');
 
-      btn.disabled = true;
-      loading.classList.add('visible');
-      result.classList.remove('visible', 'error');
+    const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000'
+  : 'https://lexipedia-production.up.railway.app';
 
-      try {
-        const response = await fetch(`${API_BASE}/define?term=${encodeURIComponent(term)}`);
-        const data = await response.json();
+const isMiniPay = typeof window.ethereum !== 'undefined' && window.ethereum.isMiniPay;
 
-        if (response.status === 402) {
-          document.getElementById('resultTerm').textContent = 'Payment Required';
-          document.getElementById('resultDefinition').textContent = 
-            'This query requires 0.01 USDC via x402 on Celo. Connect an x402-compatible wallet to proceed.';
-          document.getElementById('resultMeta').textContent = 'x402 payment gate active';
-          result.classList.add('visible', 'error');
-        } else if (response.ok) {
-          document.getElementById('resultTerm').textContent = data.term;
-          document.getElementById('resultDefinition').textContent = data.definition;
-          document.getElementById('resultMeta').textContent = data.price_paid;
-          result.classList.add('visible');
-        } else {
-          document.getElementById('resultTerm').textContent = 'Not Found';
-          document.getElementById('resultDefinition').textContent = 
-            data.error || 'Term not found in LexiPedia yet.';
-          document.getElementById('resultMeta').textContent = '';
-          result.classList.add('visible', 'error');
-        }
-      } catch (err) {
-        document.getElementById('resultTerm').textContent = 'Error';
-        document.getElementById('resultDefinition').textContent = 
-          'Could not reach LexiPedia. Please try again.';
-        result.classList.add('visible', 'error');
-      } finally {
-        btn.disabled = false;
-        loading.classList.remove('visible');
-      }
-    }
+async function lookup() {
+  const term = document.getElementById('termInput').value.trim();
+  if (!term) return;
+  await fetchDefinition(term);
+}
 
-    document.getElementById('termInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') lookup();
+async function quickLookup(term) {
+  document.getElementById('termInput').value = term;
+  await fetchDefinition(term);
+}
+
+async function payWithMiniPay(term) {
+  const { ethers } = await import('https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js');
+
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const userAddress = await signer.getAddress();
+
+  const USDC_ADDRESS = '0xcebA9300f2b948710d2653dD7B07f33A8B32118C';
+  const PAY_TO = 'YOUR_WALLET_ADDRESS';
+  const AMOUNT = ethers.parseUnits('0.01', 6);
+
+  const usdcAbi = [
+    'function transfer(address to, uint256 amount) returns (bool)'
+  ];
+
+  const usdc = new ethers.Contract(USDC_ADDRESS, usdcAbi, signer);
+  const tx = await usdc.transfer(PAY_TO, AMOUNT);
+  await tx.wait();
+
+  return tx.hash;
+}
+
+  async function fetchDefinition(term) {
+const btn = document.getElementById('searchBtn');
+const loading = document.getElementById('loading');
+const result = document.getElementById('result');
+
+btn.disabled = true;
+loading.classList.add('visible');
+result.classList.remove('visible', 'error');
+
+try {
+  if (isMiniPay) {
+    // MiniPay flow — pay directly then fetch
+    loading.textContent = 'Approving payment in MiniPay...';
+    const txHash = await payWithMiniPay(term);
+    loading.textContent = 'Payment confirmed. Loading definition...';
+
+    const response = await fetch(`${API_BASE}/define?term=${encodeURIComponent(term)}`, {
+      headers: { 'X-Minipay-Tx': txHash }
     });
+    const data = await response.json();
+
+    if (response.ok) {
+      document.getElementById('resultTerm').textContent = data.term;
+      document.getElementById('resultDefinition').textContent = data.definition;
+      document.getElementById('resultMeta').textContent = `Paid: ${data.price_paid} · tx: ${txHash.slice(0,10)}...`;
+      result.classList.add('visible');
+    } else {
+      throw new Error(data.error || 'Failed to load definition');
+    }
+  } else {
+    // Standard x402 flow
+    const response = await fetch(`${API_BASE}/define?term=${encodeURIComponent(term)}`);
+    const data = await response.json();
+
+    if (response.status === 402) {
+      document.getElementById('resultTerm').textContent = 'Payment Required';
+      document.getElementById('resultDefinition').textContent =
+        'Open LexiPedia inside MiniPay to pay 0.01 USDC and get this definition instantly.';
+      document.getElementById('resultMeta').textContent = 'x402 payment gate active';
+      result.classList.add('visible', 'error');
+    } else if (response.ok) {
+      document.getElementById('resultTerm').textContent = data.term;
+      document.getElementById('resultDefinition').textContent = data.definition;
+      document.getElementById('resultMeta').textContent = data.price_paid;
+      result.classList.add('visible');
+    } else {
+      document.getElementById('resultTerm').textContent = 'Not Found';
+      document.getElementById('resultDefinition').textContent =
+        data.error || 'Term not found in LexiPedia yet.';
+      result.classList.add('visible', 'error');
+    }
+  }
+} catch (err) {
+  document.getElementById('resultTerm').textContent = 'Error';
+  document.getElementById('resultDefinition').textContent =
+    isMiniPay ? `Payment failed: ${err.message}` : 'Could not reach LexiPedia. Please try again.';
+  result.classList.add('visible', 'error');
+} finally {
+  btn.disabled = false;
+  loading.textContent = 'Looking up definition...';
+  loading.classList.remove('visible');
+}
+}
+
+  document.getElementById('termInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') lookup();
+  });
+  </script> -->
+
+  <script>
+      const API_BASE = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000'
+      : 'https://lexipedia-production.up.railway.app';
+
+      const isMiniPay = typeof window.ethereum !== 'undefined' && window.ethereum.isMiniPay;
+
+      async function lookup() {
+        const term = document.getElementById('termInput').value.trim();
+        if (!term) return;
+        await fetchDefinition(term);
+      }
+
+      async function quickLookup(term) {
+        document.getElementById('termInput').value = term;
+        await fetchDefinition(term);
+      }
+
+      async function payWithMiniPay(term) {
+        const { ethers } = await import('https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js');
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const USDC_ADDRESS = '0xcebA9300f2b948710d2653dD7B07f33A8B32118C';
+        const PAY_TO = '0xF0bAC1491dEA4b975a3f5991a2C4B225e0456b63';
+        const AMOUNT = ethers.parseUnits('0.01', 6);
+        const usdcAbi = ['function transfer(address to, uint256 amount) returns (bool)'];
+        const usdc = new ethers.Contract(USDC_ADDRESS, usdcAbi, signer);
+        const tx = await usdc.transfer(PAY_TO, AMOUNT);
+        await tx.wait();
+        return tx.hash;
+      }
+
+      async function fetchDefinition(term) {
+        const btn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+
+        btn.disabled = true;
+        loading.classList.add('visible');
+        result.classList.remove('visible', 'error');
+
+        try {
+          if (isMiniPay) {
+            loading.textContent = 'Approving payment in MiniPay...';
+            const txHash = await payWithMiniPay(term);
+            loading.textContent = 'Payment confirmed. Loading definition...';
+
+            const response = await fetch(`${API_BASE}/define?term=${encodeURIComponent(term)}`, {
+              headers: { 'X-Minipay-Tx': txHash }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+              document.getElementById('resultTerm').textContent = data.term;
+              document.getElementById('resultDefinition').textContent = data.definition;
+              document.getElementById('resultMeta').textContent = `Paid: ${data.price_paid} · tx: ${txHash.slice(0,10)}...`;
+              result.classList.add('visible');
+            } else {
+              throw new Error(data.error || 'Failed to load definition');
+            }
+          } else {
+            const response = await fetch(`${API_BASE}/define?term=${encodeURIComponent(term)}`);
+            const data = await response.json();
+
+            if (response.status === 402) {
+              document.getElementById('resultTerm').textContent = 'Payment Required';
+              document.getElementById('resultDefinition').textContent =
+                'Open LexiPedia inside MiniPay to pay 0.01 USDC and get this definition instantly.';
+              document.getElementById('resultMeta').textContent = 'x402 payment gate active';
+              result.classList.add('visible', 'error');
+            } else if (response.ok) {
+              document.getElementById('resultTerm').textContent = data.term;
+              document.getElementById('resultDefinition').textContent = data.definition;
+              document.getElementById('resultMeta').textContent = data.price_paid;
+              result.classList.add('visible');
+            } else {
+              document.getElementById('resultTerm').textContent = 'Not Found';
+              document.getElementById('resultDefinition').textContent =
+                data.error || 'Term not found in LexiPedia yet.';
+              result.classList.add('visible', 'error');
+            }
+          }
+        } catch (err) {
+          document.getElementById('resultTerm').textContent = 'Error';
+          document.getElementById('resultDefinition').textContent =
+            isMiniPay ? `Payment failed: ${err.message}` : 'Could not reach LexiPedia. Please try again.';
+          result.classList.add('visible', 'error');
+        } finally {
+          btn.disabled = false;
+          loading.textContent = 'Looking up definition...';
+          loading.classList.remove('visible');
+        }
+      }
+
+      document.getElementById('termInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') lookup();
+      });
   </script>
+
+
 </body>
 </html>
